@@ -21,6 +21,18 @@ export interface CreateEventPayload {
 
 export type UpdateEventPayload = Partial<CreateEventPayload>;
 
+export interface Attendee {
+  registration_id: string;
+  account_id: string;
+  user_id: string;
+  email: string;
+  username: string;
+  first_name: string;
+  last_name: string;
+  whatsapp_number: string;
+  registered_at: string;
+}
+
 interface BaseResponse<T> {
   code: number;
   message: string;
@@ -36,6 +48,8 @@ export const eventsApi = {
     api.patch<BaseResponse<null>>(`/events/${id}`, payload),
   remove: (id: string) => api.remove<BaseResponse<null>>(`/events/${id}`),
   register: (id: string) => api.post<BaseResponse<null>>(`/events/${id}/register`, {}),
+  attendees: (id: string) =>
+    api.get<BaseResponse<Attendee[]>>(`/events/${id}/attendees`),
 };
 
 export function deriveEventStatus(event: Event): "ACTIVE" | "SCHEDULED" | "ENDED" {
