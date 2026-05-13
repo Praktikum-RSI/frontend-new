@@ -30,6 +30,7 @@ export default function EventDetailPage() {
   const [event, setEvent] = useState<Event | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [registerLoading, setRegisterLoading] = useState(false);
   const [registrationStep, setRegistrationStep] =
     useState<"closed" | "registration" | "confirmation" | "login-required">(
       "closed",
@@ -46,6 +47,29 @@ export default function EventDetailPage() {
 
   const goToLogin = () => {
     router.push(`/login?next=${encodeURIComponent(`/event/${eventId}`)}`);
+  };
+
+  const handleConfirmRegistration = async () => {
+    if (!eventId) return;
+
+    setRegisterLoading(true);
+    try {
+      const res = await eventsApi.register(eventId);
+
+      if (res.code === 200 || res.code === 201) {
+        setRegistrationStep("confirmation");
+
+        const updatedEvent = await eventsApi.get(eventId);
+        setEvent(updatedEvent.data);
+      } else {
+        alert(res.message || "Gagal mendaftar event.");
+      }
+    } catch (err) {
+      console.error("Registration error:", err);
+      alert(err instanceof Error ? err.message : "Terjadi kesalahan saat mendaftar.");
+    } finally {
+      setRegisterLoading(false);
+    }
   };
 
   useEffect(() => {
@@ -342,7 +366,7 @@ export default function EventDetailPage() {
 
                 <div className="rounded-xl bg-muted p-6">
                   <div className="flex gap-4">
-                    <div className="h-24 w-24 rounded-lg bg-linear-to-br from-primary/40 to-primary/80 flex-shrink-0" />
+                    <div className="h-24 w-24 rounded-lg bg-linear-to-br from-primary/40 to-primary/80 shrink-0" />
                     <div className="flex-1">
                       <Badge
                         className={`${status.bg} ${status.text} mb-2`}
@@ -366,13 +390,15 @@ export default function EventDetailPage() {
 
                 <div className="pt-6 space-y-3">
                   <Button
-                    onClick={() => setRegistrationStep("confirmation")}
+                    onClick={handleConfirmRegistration}
+                    disabled={registerLoading}
                     className="w-full bg-primary text-primary-foreground hover:bg-primary/90 text-base font-semibold py-6"
                   >
                     Konfirmasi Pendaftaran →
                   </Button>
                   <Button
                     onClick={() => setRegistrationStep("closed")}
+                    disabled={registerLoading}
                     variant="ghost"
                     className="w-full"
                   >

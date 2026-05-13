@@ -35,6 +35,7 @@ export const eventsApi = {
   update: (id: string, payload: UpdateEventPayload) =>
     api.patch<BaseResponse<null>>(`/events/${id}`, payload),
   remove: (id: string) => api.remove<BaseResponse<null>>(`/events/${id}`),
+  register: (id: string) => api.post<BaseResponse<null>>(`/events/${id}/register`, {}),
 };
 
 export function deriveEventStatus(event: Event): "ACTIVE" | "SCHEDULED" | "ENDED" {
